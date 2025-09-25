@@ -1,61 +1,57 @@
-import React, { useState } from "react"
-function App() {
-  const [prompt, setPrompt]=useState("")
-  const [playlist, setPlaylist]=useState(null)
-  const [loading, setLoading]=useState(false)
-  const getAiPlaylist=() => {
-    if (!prompt.trim()) return
-    setLoading(true)
-    setPlaylist(null)
-    fetch(`http://localhost:5000/playlist-ai?prompt=${encodeURIComponent(prompt)}`)
-      .then(res => res.json())
-      .then(data => {
-        setPlaylist(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error("ai fetch error", err)
-        setLoading(false)
-      })
+import React, { useState } from "react";
+export default function App() {
+  const [mood, setMood] = useState("");
+  const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const moods = ["happy", "sad", "chill", "workout", "romantic", "party", "focus"];
+  async function fetchPlaylist(selectedMood) {
+    try {
+      setError("");
+      setSongs([]);
+      setLoading(true);
+      const res = await fetch(`/playlist-ai?prompt=${selectedMood}`);
+      if (!res.ok) throw new Error("Failed to fetch playlist");
+      const data = await res.json();
+      setSongs(data.songs);
+      setMood(selectedMood);
+    } catch (err) {
+      setError("Could not fetch playlist");
+    } finally {
+      setLoading(false);
+    }
   }
   return (
-    <div style={{ fontFamily: "Arial", padding: 20, maxWidth: 800, margin: "0 auto" }}>
-      <h1>🎶 AI Mood Playlist</h1>
-      <p>Type how you feel and get songs that match your vibe.</p>
-      <div style={{ marginBottom: 20 }}>
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. I feel like partying tonight"
-          style={{ width: "70%", padding: 10, borderRadius: 5 }}
-        />
-        <button
-          onClick={getAiPlaylist}
-          style={{ marginLeft: 10, padding: "10px 15px", borderRadius: 5, cursor: "pointer" }}
-        >
-          Get Playlist
-        </button>
+    <div className="min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex flex-col items-center justify-center p-6 text-white">
+      <h1 className="text-4xl font-bold mb-6">🎶 Mood Playlist Generator</h1>
+      <div className="flex flex-wrap justify-center gap-3 mb-6">
+        {moods.map(m => (
+          <button
+            key={m}
+            onClick={() => fetchPlaylist(m)}
+            className={`px-4 py-2 rounded-lg font-semibold transition ${
+              mood === m ? "bg-white text-indigo-600" : "bg-indigo-700 hover:bg-indigo-600"
+            }`}
+          >
+            {m}
+          </button>
+        ))}
       </div>
-      {loading && <p>Loading playlist...</p>}
-      {playlist && (
-        <div style={{ marginTop: 30 }}>
-          <h2>Playlist for mood: <span style={{ color: "blue" }}>{playlist.mood}</span></h2>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {playlist.songs.map((song, idx) => (
-              <li key={idx} style={{ display: "flex", alignItems: "center", marginBottom: 15 }}>
-                <img src={song.albumArt} alt="cover" style={{ width: 60, height: 60, marginRight: 15 }} />
-                <div style={{ textAlign: "left" }}>
-                  <div><b>{song.title}</b> – {song.artist}</div>
-                  <a href={song.link} target="_blank" rel="noreferrer">▶ Open in Player</a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {!loading && !playlist && <p>No playlist yet. Try typing your mood above!</p>}
+      {loading && <p className="text-lg">Loading...</p>}
+      {error && <p className="text-red-200">{error}</p>}
+      <div className="grid gap-4 max-w-lg w-full">
+        {songs.map((song, idx) => (
+          <a
+            key={idx}
+            href={song.link}
+            target="_blank"
+            rel="noreferrer"
+            className="block p-4 bg-white text-indigo-700 rounded-lg shadow hover:shadow-lg transition"
+          >
+            {song.title}
+          </a>
+        ))}
+      </div>
     </div>
-  )
+  );
 }
-export default App
