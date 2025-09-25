@@ -9,7 +9,7 @@
     "start": "node server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Aditya Sachin Patil <adityapatil23450@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:5000",
+  "author": "Aditya Sachin Patil <adityapatil23450@gmail.com>",
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
